@@ -1,1 +1,1 @@
-export { add } from './add';
+export { joiResolver } from './joi-resolver';
