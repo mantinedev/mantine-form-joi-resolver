@@ -1,32 +1,40 @@
-# mantine-form-yup-resolver
+# mantine-form-joi-resolver
 
-[yup](https://www.npmjs.com/package/yup) resolver for [@mantine/form](https://mantine.dev/form/use-form/).
+[joi](https://www.npmjs.com/package/joi) resolver for [@mantine/form](https://mantine.dev/form/use-form/).
 
 ## Installation
 
 With yarn:
 
 ```sh
-yarn add yup mantine-form-yup-resolver
+yarn add joi mantine-form-joi-resolver
 ```
 
 With npm:
 
 ```sh
-npm install yup mantine-form-yup-resolver
+npm install joi mantine-form-joi-resolver
 ```
 
 ## Basic fields validation
 
 ```tsx
-import * as yup from 'yup';
+import Joi from 'joi';
 import { useForm } from '@mantine/form';
-import { yupResolver } from 'mantine-form-yup-resolver';
+import { joiResolver } from 'mantine-form-joi-resolver';
 
-const schema = yup.object().shape({
-  name: yup.string().min(2, 'Name should have at least 2 letters'),
-  email: yup.string().required('Invalid email').email('Invalid email'),
-  age: yup.number().min(18, 'You must be at least 18 to create an account'),
+const schema = Joi.object({
+  name: Joi.string().min(2).messages({
+    'string.min': 'Name should have at least 2 letters',
+    'string.empty': 'Name should have at least 2 letters',
+  }),
+  email: Joi.string()
+    .email({ tlds: { allow: false } })
+    .messages({
+      'string.email': 'Invalid email',
+      'string.empty': 'Invalid email',
+    }),
+  age: Joi.number().min(18).message('You must be at least 18 to create an account'),
 });
 
 const form = useForm({
@@ -35,7 +43,7 @@ const form = useForm({
     email: '',
     age: 16,
   },
-  validate: yupResolver(schema),
+  validate: joiResolver(schema),
 });
 
 form.validate();
@@ -50,23 +58,25 @@ form.errors;
 ## Nested fields validation
 
 ```tsx
-import * as yup from 'yup';
+import Joi from 'joi';
 import { useForm } from '@mantine/form';
-import { yupResolver } from 'mantine-form-yup-resolver';
+import { joiResolver } from 'mantine-form-joi-resolver';
 
-const nestedSchema = yup.object().shape({
-  nested: yup.object().shape({
-    field: yup.string().min(2, 'Field should have at least 2 letters'),
+const nestedSchema = Joi.object({
+  nested: Joi.object({
+    field: Joi.string().min(2).messages({
+      'string.min': 'Field should have at least 2 letters',
+      'string.empty': 'Field should have at least 2 letters',
+    }),
   }),
 });
-
 const form = useForm({
   initialValues: {
     nested: {
       field: '',
     },
   },
-  validate: yupResolver(nestedSchema),
+  validate: joiResolver(nestedSchema),
 });
 
 form.validate();
@@ -79,14 +89,17 @@ form.errors;
 ## List fields validation
 
 ```tsx
-import * as yup from 'yup';
+import Joi from 'joi';
 import { useForm } from '@mantine/form';
-import { yupResolver } from 'mantine-form-yup-resolver';
+import { joiResolver } from 'mantine-form-joi-resolver';
 
-const listSchema = yup.object().shape({
-  list: yup.array().of(
-    yup.object().shape({
-      name: yup.string().min(2, 'Name should have at least 2 letters'),
+const listSchema = Joi.object({
+  list: Joi.array().items(
+    Joi.object({
+      name: Joi.string().min(2).messages({
+        'string.min': 'Name should have at least 2 letters',
+        'string.empty': 'Name should have at least 2 letters',
+      }),
     })
   ),
 });
@@ -95,7 +108,7 @@ const form = useForm({
   initialValues: {
     list: [{ name: '' }],
   },
-  validate: yupResolver(listSchema),
+  validate: joiResolver(listSchema),
 });
 
 form.validate();
