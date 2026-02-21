@@ -113,3 +113,15 @@ it('validates list fields with given joi schema', () => {
 
   expect(hook.result.current.errors).toStrictEqual({});
 });
+
+it('validates schema asynchronously with mode async', async () => {
+  const validate = joiResolver(schema, { mode: 'async' });
+
+  await expect(validate({ name: '', email: '', age: 16 })).resolves.toStrictEqual({
+    name: 'Name should have at least 2 letters',
+    email: 'Invalid email',
+    age: 'You must be at least 18 to create an account',
+  });
+
+  await expect(validate({ name: 'John', email: 'john@email.com', age: 18 })).resolves.toStrictEqual({});
+});
