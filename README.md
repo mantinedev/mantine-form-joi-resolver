@@ -118,6 +118,20 @@ form.errors;
 // }
 ```
 
+## Async validation
+
+```tsx
+import Joi from 'joi';
+import { joiResolver } from 'mantine-form-joi-resolver';
+
+const schema = Joi.object({
+  email: Joi.string().email({ tlds: { allow: false } }).required(),
+});
+
+const validate = joiResolver(schema, { mode: 'async' });
+const errors = await validate({ email: 'invalid' });
+```
+
 ## License
 
 MIT
